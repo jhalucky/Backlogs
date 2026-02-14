@@ -1,5 +1,6 @@
 import { hybridAdvancedSearch } from "../services/hybridEngine.js";
 import { fetchByIngredients } from "../services/recipes.service.js";
+const ingredientCache = new Map();
 
 /* ===============================
    ADVANCED SEARCH CONTROLLER
@@ -53,6 +54,8 @@ export const handleAdvancedSearch = async (req, res) => {
 /* ===============================
    INGREDIENT SEARCH CONTROLLER
 ================================= */
+
+
 export const handleIngredientSearch = async (req, res) => {
   try {
     const { ingredients, page = 1 } = req.body;
