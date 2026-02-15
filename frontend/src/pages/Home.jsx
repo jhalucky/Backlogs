@@ -5,6 +5,7 @@ import Hero from "../components/Hero";
 import HowItWorks from "../components/HowItWorks";
 import IntelligenceModules from "../components/IntelligenceModules";
 import IngredientAnalyzer from "../components/IngredientAnalyzer";
+import AdvancedFilters from "../components/AdvanceFilters";
 import RecipeResults from "../components/RecipeResults";
 import EmptyState from "../components/EmptyState";
 import ImpactSection from "../components/ImpactSection";
@@ -19,13 +20,39 @@ export default function Home() {
   const [pagination, setPagination] = useState(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [filterResetKey, setFilterResetKey] = useState(0);
+
+
+  // Compute regions directly from recipes
+  const regions = [...new Set(recipes.map(r => r.Region).filter(Boolean))].sort();
+
+
 
   const handleResults = (results, ingredients, paginationData) => {
-    setRecipes(Array.isArray(results) ? results : []);
-    setSearchedIngredients(Array.isArray(ingredients) ? ingredients : []);
+    setRecipes(results || []);
+    setSearchedIngredients(ingredients || []);
     setPagination(paginationData || null);
     setHasSearched(true);
     setCurrentPage(1);
+    setFilterResetKey(prev => prev + 1);
+  };
+
+  const applyFilter = async (type, params) => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/api/recipes/${type}`,
+        { params }
+      );
+
+      if (response.data.success) {
+        setRecipes(response.data.recipes || []);
+        setPagination(response.data.pagination || null);
+        setHasSearched(true);
+        setCurrentPage(1);
+      }
+    } catch (error) {
+      console.error("Filter failed:", error);
+    }
   };
 
   const loadMore = async () => {
@@ -42,12 +69,12 @@ export default function Home() {
         }
       );
 
-      if (response?.data?.success) {
-        const newRecipes = Array.isArray(response.data.recipes)
-          ? response.data.recipes
-          : [];
+      if (response.data.success) {
+        setRecipes((prev) => [
+          ...prev,
+          ...(response.data.recipes || []),
+        ]);
 
-        setRecipes((prev) => [...prev, ...newRecipes]);
         setPagination(response.data.pagination || null);
         setCurrentPage(nextPage);
       }
@@ -63,10 +90,17 @@ export default function Home() {
         <Hero />
         <HowItWorks />
         <IntelligenceModules />
+
         <IngredientAnalyzer onResults={handleResults} />
 
+        <AdvancedFilters
+        key={filterResetKey}
+          applyFilter={applyFilter}
+          regions={regions}
+        />
+
         <div id="results">
-          {hasSearched && Array.isArray(recipes) && recipes.length > 0 && (
+          {hasSearched && recipes.length > 0 && (
             <RecipeResults
               recipes={recipes}
               ingredients={searchedIngredients}
@@ -75,9 +109,7 @@ export default function Home() {
             />
           )}
 
-          {hasSearched &&
-            Array.isArray(recipes) &&
-            recipes.length === 0 && <EmptyState />}
+          {hasSearched && recipes.length === 0 && <EmptyState />}
         </div>
 
         <ImpactSection />
