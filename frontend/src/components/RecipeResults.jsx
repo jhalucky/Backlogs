@@ -10,7 +10,6 @@ export default function RecipeResults({
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  // 🛡 Hard guard — prevent crash
   if (!Array.isArray(recipes) || recipes.length === 0) {
     return null;
   }
@@ -60,34 +59,25 @@ export default function RecipeResults({
                 ? recipe.ingredients
                 : [];
 
-              const region = typeof recipe?.Region === "string"
-                ? recipe.Region.trim()
-                : null;
+              const region =
+                typeof recipe?.Region === "string"
+                  ? recipe.Region.trim()
+                  : null;
 
               return (
                 <div
                   key={recipe?._id || recipe?.Recipe_id || index}
-                  className="group glass-strong animate-fade-in-up rounded-2xl border border-emerald-100/50 shadow-lg transition-all hover:-translate-y-2 hover:shadow-2xl"
+                  className="group rounded-2xl border border-emerald-100/50 bg-white shadow-lg transition-all hover:-translate-y-2 hover:shadow-2xl"
                 >
-                  {/* Image */}
-                  <div className="relative h-48 overflow-hidden rounded-t-2xl bg-gradient-to-br from-emerald-100 to-lime-100">
-                    <img
-                      src={`https://picsum.photos/400/300?random=${index}`}
-                      alt={recipeTitle}
-                      className="h-full w-full object-cover transition-transform group-hover:scale-110"
-                      loading="lazy"
-                    />
-                    <div className="absolute right-3 top-3 rounded-full bg-gradient-to-br from-emerald-500 to-lime-400 px-3 py-1 text-sm font-bold text-white shadow-lg">
-                      ⭐ {Math.floor(85 + Math.random() * 13)}
-                    </div>
+                  {/* Decorative Header Block (No External Image) */}
+                  <div className="flex h-32 items-center justify-center rounded-t-2xl bg-gradient-to-br from-emerald-500 to-lime-400 text-white">
+                    <span className="text-lg font-semibold text-center px-4">
+                      {recipeTitle}
+                    </span>
                   </div>
 
                   {/* Content */}
                   <div className="p-6">
-                    <h3 className="mb-3 text-xl font-bold text-slate-900">
-                      {recipeTitle}
-                    </h3>
-
                     {/* Ingredients */}
                     {recipeIngredients.length > 0 && (
                       <div className="mb-4 flex flex-wrap gap-2">
