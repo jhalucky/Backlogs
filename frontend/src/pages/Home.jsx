@@ -10,6 +10,8 @@ import RecipeResults from "../components/RecipeResults";
 import EmptyState from "../components/EmptyState";
 import ImpactSection from "../components/ImpactSection";
 import Footer from "../components/Footer";
+import PopularIngredients from "../components/PopularIngredients";
+
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
@@ -96,6 +98,36 @@ export default function Home() {
     }
   };
 
+  const handlePopularIngredient = (ingredient) => {
+  // Reset filters
+  setPagination(null);
+  setHasSearched(true);
+  setCurrentPage(1);
+
+  // Call your ingredient search endpoint
+  axios.post(`${API_BASE_URL}/api/recipes/search`, {
+    ingredients: [ingredient.toLowerCase()],
+    page: 1,
+  })
+  .then((response) => {
+    if (response.data.success) {
+      setRecipes(response.data.recipes || []);
+      setPagination(response.data.pagination || null);
+
+      // Scroll to results
+      setTimeout(() => {
+        document.getElementById("results")?.scrollIntoView({
+          behavior: "smooth",
+        });
+      }, 100);
+    }
+  })
+  .catch((err) => {
+    console.error("Popular ingredient search failed:", err);
+  });
+};
+
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-emerald-50/30 to-green-50">
       <div className="relative z-10">
@@ -103,6 +135,11 @@ export default function Home() {
         <Hero />
         <HowItWorks />
         <IntelligenceModules />
+
+        <Hero />
+<PopularIngredients onSelect={handlePopularIngredient} />
+<IngredientAnalyzer onResults={handleResults} />
+
 
         <IngredientAnalyzer onResults={handleResults} />
 
